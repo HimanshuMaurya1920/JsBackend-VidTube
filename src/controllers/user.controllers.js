@@ -201,7 +201,26 @@ const registerUser = asyncHandler(async (req , res)=>{
 const loggoutUser = asyncHandler(async ( req , res )=> {
     await User.findByIdAndUpdate(
         //todo : need to come here after Middleware
+        req.user._id ,
+        {
+            $set :{
+                refreshTocken : undefined
+            }
+        },
+        {new : true}
     )
+
+    const option = {
+            httpOnly : true ,
+            secure : process.env.NODE_ENV === "production" 
+        }
+    
+        return res
+            .status(200)
+            .clearCookie("accessToken" , option)
+            .clearCookie("refreshToken" , option)
+            .json(new ApiResponse(200 , {} , "SuccessFully Logged out"));
+
 })
 
 
@@ -209,5 +228,5 @@ export {
     registerUser ,
     loginUser    ,
     refreshAccessTocken ,
-
+    loggoutUser,
 }
